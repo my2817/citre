@@ -558,7 +558,8 @@ signaled."
           ;; Wait for the process to finish.  This trick is borrowed from
           ;; emacs-aio (https://github.com/skeeto/emacs-aio).  This doesn't
           ;; block.
-          (while (not finished)
+          (while (and (not finished)
+                      (not (string= (process-status proc) "exit")))
             ;; Some users report that Emacs freezes here, which implies that
             ;; the sentinel is never called. `accept-process-output' should
             ;; allow the sentinel to run, so I don't know, but maybe try these
@@ -573,6 +574,8 @@ signaled."
           ;; quickly.  No need to wait for the stderr pipe process as the error
           ;; message is already set when the process exits, and in practice
           ;; this lags popup completion.
+          (setq success t)
+          (setq finished t)
           (when success
             (while (accept-process-output proc)))
           (cond
